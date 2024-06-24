@@ -1,0 +1,275 @@
+﻿Create Database Census
+Use Census
+
+Select * from Data1
+Select * from Data2
+
+--.Number of rows into our dataset
+Select count(*) as No_of_Row from Data1;
+Select count(*) as No_of_Row from Data2;
+
+--. Average Literacy Rate
+Select avg(Literacy) Avg_Literacy from Data1;
+
+--State wise Highest Literacy Rate State:
+Select State,avg(Literacy) Avg_Literacy from Data1
+Group by State order by Avg_Literacy desc;
+
+--Five Highest Literacy Rate State:
+Select top 5 State,avg(Literacy) Avg_Literacy from Data1
+Group by State order by Avg_Literacy desc;
+
+--Five Lowest Literacy Rate State:
+Select top 5 State,avg(Literacy) Avg_Literacy from Data1
+Group by State order by Avg_Literacy asc;
+
+--Literacy Rate by State
+Select State,avg(Literacy) Avg_Literacy from Data1 group by State;
+
+--Lowest Literacy rate district in india
+Select District,State from Data1 where Literacy =(Select min(Literacy) from Data1)
+
+--Maximum Literacy rate district in india
+Select District,State from Data1 where Literacy =(Select max(Literacy) from Data1)
+
+----.Overall Sex Ratio
+Select AVG(Sex_Ratio) as [Overall Sex Ratio] FROM Data1;
+
+--Average Sex Ratio by State
+Select State, AVG(Sex_Ratio) AS [Average Sex Ratio] FROM Data1
+GROUP BY State ORDER BY [Average Sex Ratio] DESC;
+
+--Five Highest Sex Ratio State:
+Select top 5 State,AVG(Sex_Ratio) AS [Average Sex Ratio] from Data1
+group by State order by [Average Sex Ratio] desc;
+
+--Five Highest Sex Ratio State:
+Select top 5 State,AVG(Sex_Ratio) AS [Average Sex Ratio] from Data1
+group by State order by [Average Sex Ratio] asc;
+
+--Lowest Sex Ratio district in india
+Select District,State,Sex_Ratio from Data1 where Sex_Ratio=(Select min(Sex_Ratio) from Data1);
+
+--Hightest Sex Ratio district in india
+Select District,State,Sex_Ratio from Data1 where Sex_Ratio=(Select max(Sex_Ratio) from Data1);
+
+--States with Balanced Sex Ratios (around 1000)
+Select State, AVG(Sex_Ratio) as [Average Sex Ratio] From Data1
+Group by State
+Having AVG(Sex_Ratio) BETWEEN 990 AND 1010;
+
+--Districts with High Sex Ratios and High Literacy Rates
+Select District,State,Sex_Ratio,Literacy From Data1
+Where Sex_Ratio > 1000 and Literacy > 90;
+
+--Distribution of Sex Ratios Across Districts
+SELECT
+CASE
+WHEN Sex_Ratio < 900 THEN '<900'
+WHEN Sex_Ratio BETWEEN 900 AND 950 THEN '900-950'
+WHEN Sex_Ratio BETWEEN 951 AND 1000 THEN '951-1000'
+WHEN Sex_Ratio BETWEEN 1001 AND 1050 THEN '1001-1050'
+ELSE '>1050'
+END AS [Sex Ratio Range],
+COUNT(*) AS Count
+FROM Data1
+GROUP BY
+CASE
+WHEN Sex_Ratio < 900 THEN '<900'
+WHEN Sex_Ratio BETWEEN 900 AND 950 THEN '900-950'
+WHEN Sex_Ratio BETWEEN 951 AND 1000 THEN '951-1000'
+WHEN Sex_Ratio BETWEEN 1001 AND 1050 THEN '1001-1050'
+ELSE '>1050'
+END;
+
+--.Overall Growth Rate
+Select AVG(Growth) as [Overall Growth Rate]  FROM Data1;
+
+--State with Highest Growth Rate:
+Select State,AVG(Growth) as [Overall Growth Rate]  FROM Data1
+group by state order by [Overall Growth Rate] desc;
+
+--Lowest Growth rate district in india
+Select District,State,Growth from Data1 where Growth=(Select min(Growth) from Data1);
+
+--Hightest Growth rate district in india
+Select District,State,Growth from Data1 where Growth=(Select max(Growth) from Data1);
+
+--5 Districts with Lowest Growth Rates
+SELECT TOP 5 District, State, Growth FROM Data1
+ORDER BY Growth ASC;
+
+--5 Districts with Highest Growth Rates
+SELECT TOP 5 District, State, Growth FROM Data1
+ORDER BY Growth Desc;
+
+--Growth Rate Distribution Across Districts
+Select
+CASE
+WHEN Growth < 0 THEN 'Negative Growth'
+WHEN Growth BETWEEN 0 AND 2 THEN '0-2%'
+WHEN Growth BETWEEN 2 AND 5 THEN '2-5%'
+WHEN Growth BETWEEN 5 AND 10 THEN '5-10%'
+ELSE '>10%'
+END AS GrowthRateRange,
+COUNT(*) AS Count
+FROM Data1
+GROUP BY
+CASE
+WHEN Growth < 0 THEN 'Negative Growth'
+WHEN Growth BETWEEN 0 AND 2 THEN '0-2%'
+WHEN Growth BETWEEN 2 AND 5 THEN '2-5%'
+WHEN Growth BETWEEN 5 AND 10 THEN '5-10%'
+ELSE '>10%'
+END;
+
+--.Total Population
+SELECT SUM(Population) AS TotalPopulation FROM Data2;
+
+--Total Population by State
+Select State,sum(Population) Total_Population from Data2
+group by State order by Total_Population desc;
+
+--Top 5 highest State by Population
+Select top 5 State,sum(Population) Total_Population from Data2
+group by State order by Total_Population desc;
+
+--Area wise top 5 state
+Select top 5 State,sum(Area_km2) as [Total Area] from Data2
+group by State order by [Total Area] desc;
+
+--Districts with Population Above 5000000
+SELECT District,State,Population FROM Data2
+WHERE Population > 5000000;
+
+--Districts with Area Below 100
+SELECT District, State, Area_km2 FROM Data2
+WHERE Area_km2 < 100 order by Area_km2 desc;
+
+--Districts with Highest Population Density
+Select District,State,Population/Area_km2 as Population_Density from Data2
+order by Population_Density desc;
+
+--States with Most Evenly Distributed Population Density
+Select State, STDEV(Population/Area_km2) AS [Population Density Stdev] From Data2
+Group by State
+Order by [Population Density Stdev] ASC;
+
+--Districts with Extremely High or Low Population Density
+Select District, State, Population / Area_km2 AS Population_Density From Data2
+WHERE (Population / Area_km2) > 1000 OR (Population / Area_km2) < 50
+Order by Population_Density DESC;
+
+--Population Distribution Across States
+Select State, COUNT(*) AS DistrictCount, SUM(Population) AS TotalPopulation,
+AVG(Population) AS AveragePopulation, MIN(Population) AS MinPopulation, MAX(Population) AS MaxPopulation
+FROM Data2
+Group by State
+Order by TotalPopulation Desc;
+
+--Comparing Population Density Among the Largest and Smallest Districts
+Select District, State, Population/Area_km2 as Population_Density
+FROM Data2
+Where Area_km2 = (Select MAX(Area_km2) FROM Data2)
+OR Area_km2 = (Select MIN(Area_km2) FROM Data2)
+Order by Population_Density Desc;
+
+--States with Largest Variation in District Area
+Select State,MAX(Area_km2)-MIN(Area_km2) as Area_Range
+From Data2
+Group by State
+Order by Area_Range DESC;
+
+--States with Most Balanced Distribution of District Populations
+Select State,STDEV(Population) AS Population_Stdev
+From Data2
+Group by State
+Order by Population_Stdev ASC;
+
+--Denormalization data from both table
+Select a.District,a.State,a.Growth,a.Sex_Ratio,a.Literacy,b.Area_km2,b.Population
+from Data1 a
+inner join Data2 b
+on a.District=b.District
+order by Population desc;
+
+--Population and Literacy Rate Correlation
+Select a.District,a.State,b.Population,a.Literacy
+from Data1 a
+INNER JOIN Data2 b ON a.District = b.District
+order by b.Population DESC;
+
+--Population Growth Impact
+Select a.District,a.State,a.Population,b.Growth,Round((a.Population * b.Growth / 100),2)
+AS Population_Growth_Impact FROM Data2 a
+INNER JOIN Data1 b ON a.District = b.District
+order by Population_Growth_Impact desc;
+
+--Literacy Rate and Population Density Correlation
+Select a.District,a.State,d.Literacy,Round((a.Population/a.Area_km2),2)AS Population_Density
+FROM Data2 a
+INNER JOIN Data1 d ON a.District = d.District AND a.State=d.State
+ORDER BY d.Literacy DESC;
+
+--Districts with High Growth and High Literacy
+Select d.District, d.State, d.Growth, d.Literacy
+FROM Data1 d
+INNER JOIN Data2 pa ON d.District = pa.District
+WHERE d.Growth > 1 AND d.Literacy > 50;
+
+Select District,State,Growth,Literacy
+FROM Data1 WHERE Growth > 1 AND Literacy > 50;
+
+--Districts with Low Population Density and High Literacy
+Select a.District,a.State,a.Literacy,b.Area_km2,b.Population,round((b.Population/b.Area_km2),2)
+AS PopulationDensity FROM Data1 a
+INNER JOIN Data2 b ON a.District =b.District AND a.State =b.State
+WHERE (b.Population /b.Area_km2) < 200 AND a.Literacy >90;
+
+--Population Contribution of Top 3 Districts in Each State
+WITH TopDistricts AS (
+Select District,State,Population,
+ROW_NUMBER() OVER (PARTITION BY State ORDER BY Population DESC) AS Rank
+FROM Data2
+)
+Select State, District, Population
+FROM TopDistricts
+WHERE Rank <= 3
+ORDER BY State,Rank;
+
+--Comparison of Growth and Population Density by State
+Select a.State, Round(AVG(b.Growth),3)AS Average_Growth, Round(AVG(a.Population/a.Area_km2),2) AS Avg_Pop_Density
+FROM Data2 a
+INNER JOIN Data1 b ON a.District=b.District
+GROUP BY a.State;
+
+--State-wise Distribution of High Growth and Low Growth Districts
+--High Growth
+Select State,COUNT(*) AS High_Growth_Districts FROM Data1
+WHERE Growth > 1 GROUP BY State;
+
+--Low Growth
+Select State,COUNT(*) AS Low_Growth_Districts FROM Data1
+WHERE Growth < 0 GROUP BY State;
+
+--Sex Ratio vs. Population Density
+SELECT pa.District, pa.State, d.Sex_Ratio, Round((pa.Population / pa.Area_km2),2) AS Population_Density
+FROM Data1 d
+INNER JOIN Data2 pa ON d.District = pa.District AND d.State = pa.State
+ORDER BY Population_Density DESC;
+
+
+
+
+--
+
+
+Select * from Data1
+Select * from Data2
+
+
+
+
+
+
+
